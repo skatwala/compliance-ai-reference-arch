@@ -1,114 +1,73 @@
-# 🏢 Compliance AI Reference Architecture
+# 🏗️ Architecture Blueprints
 
-This repository demonstrates **enterprise-ready compliance patterns** for deploying AI systems in regulated industries (healthcare, finance, insurance).  
-It bridges **technical engineering** with **legal, privacy, and audit requirements**, showing how to move from **prototype → production-grade AI**.
-
----
-
-## 📂 Repository Structure
-
-- **`notebooks/`**  
-  Databricks notebooks implementing the full governed AI pipeline.  
-  Includes:  
-  - 🧠 `01_ingest_transcribe_delta.py` – Ingests and stages audio transcripts into Delta tables with ACID guarantees.  
-  - 🔍 `02_governance_mlflow.py` – Registers, tracks, and audits DistilBERT model runs via MLflow + TrustGate decorators.  
-  - 🕰 `03_delta_acid_timetravel.py` – Demonstrates rollback and versioning for reproducibility and compliance.  
-  - 🖼️ `outputs/` – Screenshots and HTML exports showing cell outputs, visualizations, and evaluation metrics.  
-
-- **`compliance_patterns/`**  
-  Core **architecture-level patterns** ensuring privacy, auditability, and reproducibility.  
-  Includes:  
-  - 🔒 PHI/PII Masking  
-  - 🧾 Audit & Traceability Decorators  
-  - 📜 MLflow Model Governance  
-  - 🕰 Delta Lake ACID + Time Travel  
-  - 📑 Compliance Checklists  
-
-- **`governance_templates/`**  
-  **Templates and workflows** that make compliance repeatable and auditable.  
-  Includes:  
-  - 📜 Model Cards  
-  - ✅ Compliance Checklists  
-  - 🚦 Approval Gates  
-  - 📊 Monitoring & Reporting  
-
-- **`architecture/`**  
-  Diagrams, narratives, and explanations of the Databricks workflow.  
-  - `diagram.png` – End-to-end pipeline from ingestion to governance.  
-  - `README.md` – Narrative overview and fold-strategy explanation (3-fold / 5-fold / 30-fold).  
+This folder provides **high-level architecture views** showing how compliance and governance are embedded directly into Databricks-based AI systems.  
+It is written for **executives, regulators, and technical architects** who need to understand the **governed AI lifecycle** — from data ingestion to model evaluation — in both narrative and visual form.
 
 ---
 
-## 🎯 Goals
+## 🧭 Narrative Overview
 
-1. **Shift Left on Governance**  
-   Embed compliance directly into code, not as an afterthought.
+The Compliance-AI architecture operationalizes a **governed machine-learning workflow** that prioritizes *traceability, reproducibility, and accountability*.
 
-2. **Enable Regulators & Boards**  
-   Provide **clear audit trails, sign-offs, and reproducibility**.
+1. **Data Ingestion & Masking**  
+   - All incoming data (e.g., audio transcripts or call logs) passes through PHI/PII masking layers.  
+   - Unity Catalog applies column-level governance, ensuring no sensitive data leaves the secure perimeter.
 
-3. **Standardize Trustworthy AI**  
-   Deliver **patterns + templates** that can be reused across all AI projects.
+2. **Delta Lake Storage & ACID Guarantees**  
+   - Every transformation is stored in **Delta tables**, providing ACID transactions and **time-travel rollback**.  
+   - This ensures a model can always be reproduced at the same data state for audits or FDA/GxP reviews.
+
+3. **Model Training & Governance (MLflow + TrustGate)**  
+   - Models such as **DistilBERT** are fine-tuned on versioned datasets.  
+   - All runs are wrapped in **TrustGate decorators** that log correlation IDs, retries, and metadata to MLflow.  
+   - Every experiment includes tags for owner, dataset hash, risk rating, and validation fold count.
+
+4. **Evaluation & Fold Strategy**  
+   - Each model run is validated using multiple stratified folds to ensure fairness, stability, and reliability (see below).  
+   - Results and metrics are stored alongside lineage artifacts for end-to-end auditability.
+
+5. **Governance, Approval & Monitoring**  
+   - MLflow Registry + Compliance Templates enforce approval gates.  
+   - Dashboards surface drift, bias, and latency to Compliance and Risk teams.  
+   - Reports are automatically versioned for regulator-ready evidence.
 
 ---
 
-## 🧠 Databricks Workflow Overview
+## 🧩 Fold-Strategy Explanation (3-Fold / 5-Fold / 30-Fold)
+
+| Fold Type | Purpose | Typical Usage | Governance Benefit |
+|------------|----------|----------------|--------------------|
+| **3-Fold Validation** | Quick reliability check for small datasets or early experimentation | Used in rapid iteration phases or exploratory notebooks | Provides minimal yet repeatable baseline with short runtime |
+| **5-Fold Validation** | Balanced trade-off between runtime and statistical confidence | Used in production candidate evaluation before model promotion | Delivers moderate robustness while maintaining compute efficiency |
+| **30-Fold Cross-Validation** | Deep reliability audit for regulated releases (e.g., clinical / finance) | Applied during final model assurance prior to regulatory filing | Produces statistically stable results and **reduces overfitting risk** |
+
+**Rationale:**  
+- The fold count is logged as a **governance parameter** (`fold_strategy`) in MLflow.  
+- Higher folds trigger longer runtime but yield more defensible model metrics under audit.  
+- For regulated AI, reproducibility across folds is **a compliance control**, not just a technical choice.
+
+---
+
+## 🖼️ Example: Compliance-Aware AI Pipeline
 
 ```mermaid
-flowchart TD
-    A[📥 Data Ingestion<br/>Delta Table + Unity Catalog] --> B[🤖 GPT Summarization]
-    B --> C[🧩 DistilBERT Fine-tuning]
-    C --> D[📜 MLflow Governance<br/>TrustGate Decorators]
-    D --> E[🕰 Delta Time Travel<br/>Audit & Recovery]
-    E --> F[📊 Evaluation Outputs<br/>Fold-Based Validation]
-
-    subgraph Governance Layer
-        D
-        E
+flowchart LR
+    subgraph Ingestion
+        A[📥 Audio Upload] --> B[🔒 PHI/PII Masking]
+        B --> C[🧾 Append-Only Audit Logs]
     end
 
-    subgraph Evaluation
-        F
+    subgraph Storage
+        C --> D[🗂️ Delta Lake\nACID + Time Travel]
     end
-```
 
-This flow captures the **governed Databricks lifecycle**: ingestion → summarization → model training → MLflow logging → version rollback.  
-Every run is traceable and reproducible under enterprise-grade audit controls.
+    subgraph ModelOps
+        D --> E[📜 MLflow Registry\nModel Metadata]
+        E --> F[🚦 Approval Gates\nFold-Aware Evaluation]
+    end
 
----
+    subgraph Monitoring
+        F --> G[📊 Compliance Dashboards\nBias · Latency · Drift]
+    end
 
-## 🏆 Why This Matters
-
-Regulated industries face the dual challenge of **innovation + oversight**.  
-This repository shows how to make AI **trustworthy, auditable, and board-ready**, ensuring adoption doesn’t stall at *“proof of concept.”*  
-
-By using these patterns:  
-- Engineers get **clear compliance scaffolding**.  
-- Risk/Legal teams see **auditability & controls**.  
-- Executives gain **confidence to scale AI safely**.
-
----
-
-## 🧩 Key Compliance Features
-
-| Feature | Description |
-|----------|-------------|
-| **TrustGate Decorators** | Unified logging, retries, and correlation IDs applied to Databricks runs |
-| **Delta ACID + Time Travel** | Reproducible version control and rollback for governed data |
-| **MLflow Governance Layer** | Centralized model tracking with ownership and risk metadata |
-| **Evaluation Fold Patterns** | Demonstrates 3-fold, 5-fold, and 30-fold stratified evaluations for reliability |
-| **Policy Templates** | Governance artifacts ready for audit submission |
-
----
-
-## 🚀 Next Steps
-
-- Extend templates for **bias detection and explainability**.  
-- Add **multi-region data residency** patterns for GDPR/HIPAA.  
-- Integrate **Databricks jobs** with CI/CD pipelines using GitHub Actions.  
-- Publish **compliance-ready APIs** with FastAPI unit tests.
-
----
-
-> 💡 This repository is a **blueprint** for any team that needs to prove:  
-> *“Our AI is compliant, auditable, and production-ready.”*
+    G -->|Reports| H[📑 Regulators & Boards]
