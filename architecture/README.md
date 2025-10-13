@@ -1,10 +1,8 @@
 # 🏗️ Architecture Blueprints
 
-This folder provides **high-level architecture views** that show how compliance and governance are embedded into AI systems.  
-The diagrams and notes here are intended for **executives, regulators, and technical architects** to understand the **big picture**.
+This folder provides **high-level architecture views** showing how compliance and governance are embedded directly into Databricks-based AI systems.  
+It is written for **executives, regulators, and technical architects** who need to understand the **governed AI lifecycle** — from data ingestion to model evaluation — in both narrative and visual form.
 
- 
- 
 ---
 
 ## 🧭 Narrative Overview
@@ -60,16 +58,16 @@ flowchart LR
     end
 
     subgraph Storage
-        C --> D[🗂️ Delta Lake<br/>ACID + Time Travel]
+        C --> D[🗂️ Delta Lake\nACID + Time Travel]
     end
 
     subgraph ModelOps
-        D --> E[📜 MLflow Registry<br/>Model Metadata]
-        E --> F[🚦 Approval Gates<br/>(Fold-Aware Evaluation)]
+        D --> E[📜 MLflow Registry\nModel Metadata]
+        E --> F[🚦 Approval Gates\nFold-Aware Evaluation]
     end
 
     subgraph Monitoring
-        F --> G[📊 Compliance Dashboards<br/>Bias · Latency · Drift]
+        F --> G[📊 Compliance Dashboards\nBias · Latency · Drift]
     end
 
     G -->|Reports| H[📑 Regulators & Boards]
